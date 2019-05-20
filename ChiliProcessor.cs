@@ -13,6 +13,10 @@ namespace PluginToChili
 
         private XmlDocument chiliDocument;
 
+        /// <summary>
+        /// Load the CHILI document into the processor
+        /// </summary>
+        /// <param name="documentXmlString"></param>
         public void LoadChiliDocumentXml(string documentXmlString)
         {
             if (string.IsNullOrEmpty(documentXmlString))
@@ -33,7 +37,13 @@ namespace PluginToChili
 
         }
 
-        //private List<Theme> themes = new List<Theme>();
+        /// <summary>
+        /// Methed to process the document into themes and run an ILayerConversions that you pass
+        /// </summary>
+        /// <param name="parentlessThemeName">Name of the base theme which all layers that don't have a theme tag will be added to</param>
+        /// <param name="themeTags">Tags for themes that will be used to identify themes on layers</param>
+        /// <param name="layerConversions">ILayerConversions that allow you to add function of converting frames under layers</param>
+        /// <returns></returns>
         public string ProcessDocument(string parentlessThemeName, IEnumerable<string> themeTags, IEnumerable<ILayerConversion> layerConversions = null)
         {
             // Get the main document node
@@ -47,6 +57,14 @@ namespace PluginToChili
             return chiliDocument.InnerXml;
         }
 
+        /// <summary>
+        /// Iterate through layers, create themes, and tie layers to ILayerConversion objects
+        /// </summary>
+        /// <param name="xmlDocument">XmlDocument of the CHILI document</param>
+        /// <param name="parentlessThemeName">Name of the base theme which all layers that don't have a theme tag will be added too</param>
+        /// <param name="themeTags">ags for themes that will be used to identify themes on layers</param>
+        /// <param name="layerConversions">ILayerConversions that allow you to add function of converting frames under layers</param>
+        /// <returns></returns>
         private IEnumerable<Theme> ProcessLayersToThemes(XmlDocument xmlDocument, string parentlessThemeName, IEnumerable<string> themeTags = null, IEnumerable<ILayerConversion> layerConversions = null)
         {
             // Get the main document node
@@ -56,7 +74,7 @@ namespace PluginToChili
 
             List<Theme> themes = new List<Theme>()
             {
-                new Theme("parentlessThemeName")
+                new Theme(parentlessThemeName)
             };
 
             foreach (XmlNode layerNode in layers)
@@ -118,6 +136,11 @@ namespace PluginToChili
             return themes;
         }
 
+        /// <summary>
+        /// Process on frames on the document base on ILayerConversion objects found in themes
+        /// </summary>
+        /// <param name="themes">IEnumerable list of themes</param>
+        /// <param name="xmlDocument">XmlDocument of the CHILI document</param>
         private void ProcessFrames(IEnumerable<Theme> themes, XmlNode xmlDocument)
         {
             // Get the main document node
@@ -146,6 +169,11 @@ namespace PluginToChili
             }
         }
 
+        /// <summary>
+        /// Serializes the Theme objects into JSON and addeds them to the document on the private data
+        /// </summary>
+        /// <param name="themes">IEnumerable list of themes</param>
+        /// <param name="xmlDocument">XmlDocument of the CHILI document</param>
         private void AddPrivateData(IEnumerable<Theme> themes, XmlDocument xmlDocument)
         {
             // Get the main document node
@@ -179,6 +207,12 @@ namespace PluginToChili
             documentNode.AppendChild(privateData);
         }
 
+        /// <summary>
+        /// Get the theme name from the layer name
+        /// </summary>
+        /// <param name="layerName"></param>
+        /// <param name="themeTag"></param>
+        /// <returns></returns>
         private string GetThemeNameFromLayerName(string layerName, string themeTag)
         {
             if (layerName.Contains(themeTag))
